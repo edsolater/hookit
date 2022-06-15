@@ -1,6 +1,6 @@
 import { RefObject, useEffect } from 'react'
 
-import useToggle from './useToggle'
+import { useToggle } from './useToggle'
 
 export interface UseClickOptions {
   disable?: boolean

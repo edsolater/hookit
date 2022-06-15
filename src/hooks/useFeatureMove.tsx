@@ -1,10 +1,9 @@
 import { calcHypotenuse, staySameSign } from '@edsolater/fnkit'
-import { Delta2dTranslate, SpeedVector, Vector, Direction, } from '@edsolater/fnkit' // these type should not in fnkit
+import { Delta2dTranslate, SpeedVector, Vector, Direction } from '@edsolater/fnkit' // these type should not in fnkit
 import { RefObject, useEffect } from 'react'
 import { attachPointerMove } from '../utils/dom/gesture/pointerMove'
 import setTranslate from '../utils/dom/setTranslate'
-import useToggle from './useToggle'
-
+import { useToggle } from './useToggle'
 
 export const DIRECTION = {
   TOP: 'top',

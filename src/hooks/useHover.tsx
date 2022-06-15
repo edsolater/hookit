@@ -1,7 +1,7 @@
 import { RefObject, useEffect } from 'react'
 
 import { Nullish } from '@edsolater/fnkit'
-import useToggle from './useToggle'
+import { useToggle } from './useToggle'
 
 //#region ------------------- hook: useHover() -------------------
 
