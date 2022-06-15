@@ -28,7 +28,7 @@ export type UseToggleRefReturn = [RefObject<boolean>, ToggleController]
  * @param initValue
  *
  */
-export default function useToggle(
+export  function useToggle(
   initValue: MayFn<boolean> = false,
   options?: {
     /* usually it is for debug */
