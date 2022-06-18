@@ -1,5 +1,6 @@
 import { MayFn } from '@edsolater/fnkit'
 import { Dispatch, RefObject, SetStateAction, useCallback, useMemo } from 'react'
+import useCallbackRef from './useCallbackRef'
 import { UseSignal, useSignal } from './useSignal'
 
 export interface ToggleSyncFunction {
@@ -28,26 +29,8 @@ export type UseToggleRefReturn = [RefObject<boolean>, ToggleController]
  * @param initValue
  *
  */
-export  function useToggle(
-  initValue: MayFn<boolean> = false,
-  options?: {
-    /* usually it is for debug */
-    onOff?(): void
-    /* usually it is for debug */
-    onOn?(): void
-    /* usually it is for debug */
-    onToggle?(): void
-  }
-): [
-  boolean,
-  {
-    on: () => void
-    off: () => void
-    toggle: () => void
-    set: (b: boolean) => void
-  }
-] {
-  const { state, ...restControls } = useToggleByBase(useSignal(initValue), options ?? {})
+export function useToggle(initValue: MayFn<boolean> = false, options?: UseToggleOptions): UseToggleReturn {
+  const { state, ...restControls } = useToggleByBase(initValue, options ?? {})
   return [state(), restControls]
 }
 
@@ -55,20 +38,8 @@ export  function useToggle(
  * it too widely use that there should be a hook
  * @param initValue
  */
-export function useToggleRef(
-  initValue: MayFn<boolean> = false,
-  options: {
-    /**only affact delay-* and canelDelayAction */
-    delay?: number
-    /* usually it is for debug */
-    onOff?(): void
-    /* usually it is for debug */
-    onOn?(): void
-    /* usually it is for debug */
-    onToggle?(): void
-  } = {}
-): UseToggleRefReturn {
-  const { state, ...restControls } = useToggleByBase(useSignal(initValue), options ?? {})
+export function useToggleRef(initValue: MayFn<boolean> = false, options: UseToggleOptions = {}): UseToggleRefReturn {
+  const { state, ...restControls } = useToggleByBase(initValue, options ?? {})
   const simulate = useMemo(
     () => ({
       get current() {
@@ -89,24 +60,25 @@ export function createToggleController<T extends Dispatch<SetStateAction<any>>>(
   }
 }
 
-function useToggleByBase<S>(
-  base: UseSignal<S>,
-  options: {
-    /**only affact delay-* and canelDelayAction */
-    delay?: number
-    /* usually it is for debug */
-    onOff?(): void
-    /* usually it is for debug */
-    onOn?(): void
-    /* usually it is for debug */
-    onToggle?(): void
-  }
-): UseSignal<S, ToggleController> {
+type UseToggleOptions = {
+  /**only affact delay-* and canelDelayAction */
+  delay?: number
+  /* usually it is for debug */
+  onOff?(): void
+  /* usually it is for debug */
+  onOn?(): void
+  /* usually it is for debug */
+  onToggle?(): void
+  onChange?(isOn: boolean, prev?: boolean): void
+}
+
+function useToggleByBase(initValue: MayFn<boolean>, options: UseToggleOptions): UseSignal<boolean, ToggleController> {
   const opts = { delay: 800, ...options }
+  const signal = useSignal(initValue, { onChange: opts.onChange })
   const { state: delayActionId, setState: setDelayActionId } = useSignal<number | NodeJS.Timeout>(0)
   const setIsOn = (...params: any[]) => {
     //@ts-expect-error temp
-    base.setState(...params)
+    signal.setState(...params)
   }
 
   //#region ------------------- controls -------------------
@@ -155,7 +127,7 @@ function useToggleByBase<S>(
   //#endregion
 
   return {
-    ...base,
+    ...signal,
     cancelDelayAction,
     delayOn,
     delayOff,

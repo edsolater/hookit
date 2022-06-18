@@ -6,46 +6,46 @@ import { useToggle } from './useToggle'
 //#region ------------------- hook: useHover() -------------------
 
 export interface UseHoverOptions {
+  triggerDelay?: number
   disable?: boolean
-  onHoverStart?: (ev: { el: EventTarget; nativeEvent: PointerEvent }) => void
-  onHoverEnd?: (ev: { el: EventTarget; nativeEvent: PointerEvent }) => void
-  onHover?: (ev: { el: EventTarget; nativeEvent: PointerEvent; is: 'start' | 'end' }) => void
+  onHoverStart?: (info: { ev: PointerEvent }) => void
+  onHoverEnd?: (info: { ev: PointerEvent }) => void
+  onHover?: (info: { ev: PointerEvent; is: 'start' | 'end' }) => void
 }
 
 export default function useHover(
-  refs: HTMLElementRefs,
-  { disable, onHoverStart, onHoverEnd, onHover }: UseHoverOptions = {}
+  ref: HTMLElementRefs,
+  { disable, onHoverStart: onHoverEnter, onHoverEnd: onHoverLeave, onHover, triggerDelay }: UseHoverOptions = {}
 ) {
-  if (!refs) return
-  const [isHovered, { on: turnonHover, off: turnoffHover }] = useToggle(false)
+  const [isHover, { on: turnonHover, off: turnoffHover }] = useToggle(false)
 
   useEffect(() => {
     if (disable) return
+    let hoverDelayTimerId
     const hoverStartHandler = (ev: PointerEvent) => {
-      turnonHover()
-      onHover?.({
-        el: ev.target!,
-        nativeEvent: ev!,
-        is: 'start'
-      })
-      onHoverStart?.({
-        el: ev.target!,
-        nativeEvent: ev!
-      })
+      if (disable) return
+      if (triggerDelay) {
+        hoverDelayTimerId = setTimeout(() => {
+          hoverDelayTimerId = undefined
+          turnonHover()
+          onHover?.({ ev, is: 'start' })
+          onHoverEnter?.({ ev })
+        }, triggerDelay)
+      } else {
+        turnonHover()
+        onHover?.({ is: 'start', ev })
+        onHoverEnter?.({ ev })
+      }
     }
     const hoverEndHandler = (ev: PointerEvent) => {
+      if (disable) return
       turnoffHover()
-      onHover?.({
-        el: ev.target!,
-        nativeEvent: ev!,
-        is: 'end'
-      })
-      onHoverEnd?.({
-        el: ev.target!,
-        nativeEvent: ev!
-      })
+      onHover?.({ ev, is: 'end' })
+      onHoverLeave?.({ ev })
+      clearTimeout(hoverDelayTimerId)
+      hoverDelayTimerId = undefined
     }
-    const els = getHTMLElementsFromRefs(refs)
+    const els = getHTMLElementsFromRefs(ref)
     els.forEach((el) => el.addEventListener('pointerenter', hoverStartHandler))
     els.forEach((el) => el.addEventListener('pointerleave', hoverEndHandler))
     els.forEach((el) => el.addEventListener('pointercancel', hoverEndHandler))
@@ -54,7 +54,7 @@ export default function useHover(
       els.forEach((el) => el.removeEventListener('pointerleave', hoverEndHandler))
       els.forEach((el) => el.removeEventListener('pointercancel', hoverEndHandler))
     }
-  }, [disable, onHoverStart, onHoverEnd, onHover])
+  }, [disable, onHoverEnter, onHoverLeave, onHover])
 
-  return isHovered
+  return isHover
 }
