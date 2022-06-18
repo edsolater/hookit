@@ -1,6 +1,6 @@
-import { RefObject, useEffect } from 'react'
+import { useEffect } from 'react'
 
-import { Nullish } from '@edsolater/fnkit'
+import { getHTMLElementsFromRefs, HTMLElementRefs } from '../utils/react/getElementsFromRefs'
 import { useToggle } from './useToggle'
 
 //#region ------------------- hook: useHover() -------------------
@@ -13,10 +13,10 @@ export interface UseHoverOptions {
 }
 
 export default function useHover(
-  ref: RefObject<HTMLElement | Nullish> | Nullish,
+  refs: HTMLElementRefs,
   { disable, onHoverStart, onHoverEnd, onHover }: UseHoverOptions = {}
 ) {
-  if (!ref) return
+  if (!refs) return
   const [isHovered, { on: turnonHover, off: turnoffHover }] = useToggle(false)
 
   useEffect(() => {
@@ -45,13 +45,14 @@ export default function useHover(
         nativeEvent: ev!
       })
     }
-    ref.current?.addEventListener('pointerenter', hoverStartHandler)
-    ref.current?.addEventListener('pointerleave', hoverEndHandler)
-    ref.current?.addEventListener('pointercancel', hoverEndHandler)
+    const els = getHTMLElementsFromRefs(refs)
+    els.forEach((el) => el.addEventListener('pointerenter', hoverStartHandler))
+    els.forEach((el) => el.addEventListener('pointerleave', hoverEndHandler))
+    els.forEach((el) => el.addEventListener('pointercancel', hoverEndHandler))
     return () => {
-      ref.current?.removeEventListener('pointerleave', hoverEndHandler)
-      ref.current?.removeEventListener('pointercancel', hoverEndHandler)
-      ref.current?.removeEventListener('pointerenter', hoverStartHandler)
+      els.forEach((el) => el.removeEventListener('pointerenter', hoverStartHandler))
+      els.forEach((el) => el.removeEventListener('pointerleave', hoverEndHandler))
+      els.forEach((el) => el.removeEventListener('pointercancel', hoverEndHandler))
     }
   }, [disable, onHoverStart, onHoverEnd, onHover])
 

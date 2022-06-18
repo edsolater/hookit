@@ -1,4 +1,5 @@
 import { RefObject, useEffect } from 'react'
+import { getHTMLElementsFromRefs, HTMLElementRefs } from '../utils/react/getElementsFromRefs'
 
 import { useToggle } from './useToggle'
 
@@ -10,7 +11,7 @@ export interface UseClickOptions {
 }
 
 export default function useClick(
-  ref: RefObject<HTMLElement>,
+  refs: HTMLElementRefs,
   { disable, onClick, onActiveStart, onActiveEnd }: UseClickOptions = {}
 ) {
   const [isActive, { on: turnOnActive, off: turnOffActive }] = useToggle(false)
@@ -26,15 +27,16 @@ export default function useClick(
       turnOffActive()
       onActiveEnd?.({ el: ev.target!, nativeEvent: ev! })
     }
-    ref.current?.addEventListener('pointerdown', handlePointerUp)
-    ref.current?.addEventListener('pointerup', handlePointerDown)
-    ref.current?.addEventListener('pointercancel', handlePointerDown)
-    ref.current?.addEventListener('click', handleClick)
+    const els = getHTMLElementsFromRefs(refs)
+    els.forEach((el) => el.addEventListener('pointerdown', handlePointerDown)) // TODO use domkit addEventListener
+    els.forEach((el) => el.addEventListener('pointerup', handlePointerUp))
+    els.forEach((el) => el.addEventListener('pointercancel', handlePointerDown))
+    els.forEach((el) => el.addEventListener('click', handleClick))
     return () => {
-      ref.current?.removeEventListener('pointerdown', handlePointerUp)
-      ref.current?.removeEventListener('pointerup', handlePointerDown)
-      ref.current?.removeEventListener('pointercancel', handlePointerDown)
-      ref.current?.removeEventListener('click', handleClick)
+      els.forEach((el) => el.removeEventListener('pointerdown', handlePointerDown))
+      els.forEach((el) => el.removeEventListener('pointerup', handlePointerUp))
+      els.forEach((el) => el.removeEventListener('pointercancel', handlePointerDown))
+      els.forEach((el) => el.removeEventListener('click', handleClick))
     }
   }, [disable, onClick, onActiveStart, onActiveEnd])
 

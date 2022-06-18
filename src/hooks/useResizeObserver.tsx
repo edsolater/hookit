@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { ElementRefs, getElementsFromRefs } from '../utils/react/getElementsFromRefs'
+import { HTMLElementRefs, getHTMLElementsFromRefs } from '../utils/react/getElementsFromRefs'
 
 /** for build-in ResizeObserverEntry need narrows down target manually which is tedious */
 interface GenericResizeObserverEntry<El extends Element> extends ResizeObserverEntry {
@@ -7,12 +7,12 @@ interface GenericResizeObserverEntry<El extends Element> extends ResizeObserverE
 }
 
 export default function useResizeObserver<El extends HTMLElement>(
-  ref: ElementRefs,
+  ref: HTMLElementRefs,
   callback: (entry: GenericResizeObserverEntry<El>, prevEntry: GenericResizeObserverEntry<El> | undefined) => void
 ) {
   const entryObjStack = useRef(new Map<HTMLElement, GenericResizeObserverEntry<El>[]>())
   useEffect(() => {
-    const els = getElementsFromRefs(ref)
+    const els = getHTMLElementsFromRefs(ref)
     const observer = new ResizeObserver((entries, observer) => {
       entries.forEach((entry: GenericResizeObserverEntry<any>) => {
         // record to map

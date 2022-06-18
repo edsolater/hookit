@@ -1,6 +1,6 @@
 {
   "name": "@edsolater/hookit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "simple react management, simulate core philosophy of zustand",
   "main": "./dist/index.js",
   "scripts": {

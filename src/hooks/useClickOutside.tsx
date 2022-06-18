@@ -1,5 +1,5 @@
-import { MayArray } from '@edsolater/fnkit'
-import { RefObject, useEffect } from 'react'
+import { useEffect } from 'react'
+import { getHTMLElementsFromRefs, HTMLElementRefs } from '../utils/react/getElementsFromRefs'
 
 export interface UseClickOutsideOptions {
   disable?: boolean
@@ -7,16 +7,13 @@ export interface UseClickOutsideOptions {
 }
 
 export function useClickOutside(
-  ref: MayArray<RefObject<HTMLElement | null | undefined>>,
+  ref: HTMLElementRefs,
   { disable, onClickOutSide }: UseClickOutsideOptions = {}
 ) {
   useEffect(() => {
     if (disable) return
     const handleClickOutside = (ev: Event) => {
-      const targetElements = [ref]
-        .flat()
-        .flatMap((ref) => ref.current)
-        .filter(Boolean) as HTMLElement[]
+      const targetElements = getHTMLElementsFromRefs(ref)
       if (!targetElements.length) return
       const path = ev.composedPath()
       if (targetElements.some((el) => el && path.includes(el))) return
