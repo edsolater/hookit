@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 import isHTMLElement from '../utils/dom/isHTMLElement'
-import { useFRef } from './useFRef'
+import { useFRef } from '../hooks/useFRef'
 
 type UseIntersectionObserverCallback = (entry: IntersectionObserverEntry) => void
 /** regist callback function one by one, not regist entirely */

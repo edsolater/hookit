@@ -3,7 +3,7 @@
 import { RefObject, useEffect, useRef, useState } from 'react'
 
 import isHTMLElement from '../utils/dom/isHTMLElement'
-import useResizeObserver from './useResizeObserver'
+import { useResizeObserver } from './useResizeObserver'
 
 interface UseScrollListenerOptions {
   disable?: boolean

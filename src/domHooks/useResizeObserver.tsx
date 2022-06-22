@@ -1,18 +1,19 @@
 import { useEffect, useRef } from 'react'
-import { HTMLElementRefs, getHTMLElementsFromRefs } from '../utils/react/getElementsFromRefs'
+
+import { ElementRefs, getElementsFromRefs } from '../functions/getElementsFromRefs'
 
 /** for build-in ResizeObserverEntry need narrows down target manually which is tedious */
-interface GenericResizeObserverEntry<El extends Element> extends ResizeObserverEntry {
+interface GenericResizeObserverEntry<El extends HTMLElement> extends ResizeObserverEntry {
   readonly target: El
 }
 
-export default function useResizeObserver<El extends HTMLElement>(
-  ref: HTMLElementRefs,
+export function useResizeObserver<El extends HTMLElement>(
+  ref: ElementRefs,
   callback: (entry: GenericResizeObserverEntry<El>, prevEntry: GenericResizeObserverEntry<El> | undefined) => void
 ) {
   const entryObjStack = useRef(new Map<HTMLElement, GenericResizeObserverEntry<El>[]>())
   useEffect(() => {
-    const els = getHTMLElementsFromRefs(ref)
+    const els = getElementsFromRefs(ref)
     const observer = new ResizeObserver((entries, observer) => {
       entries.forEach((entry: GenericResizeObserverEntry<any>) => {
         // record to map
