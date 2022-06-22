@@ -1,6 +1,6 @@
 import { isExist, isNullish, shrinkToValue } from '@edsolater/fnkit'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect '
+import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect'
 
 // TODO: there should be an export/import button in UI, so that user can export config and paste it to another client.
 export default function useAutoRecordToLocalStorage<T>(key: string, state: T) {

@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { MayRef, shrinkMayRef } from '../utils/react/isRefObject'
-import { addEventListener } from '../utils/dom/addEventListener'
+import { addEventListener, EventListenerController } from '../utils/dom/addEventListener'
 import { mapKey, shakeFalsy, toLowerCase, Nullish } from '@edsolater/fnkit'
 import addTabIndex from '../utils/dom/addTabIndex'
+import { getHTMLElementsFromRefs, HTMLElementRefs } from '../utils/react/getElementsFromRefs'
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
@@ -80,7 +81,7 @@ function uniqueItems<T>(arr: T[]): T[] {
  * it is not so good to customize the `Tab`, `Tab` should be move focus
  */
 export function useKeyboardShortcurt(
-  el: MayRef<HTMLElement | Nullish>,
+  el: HTMLElementRefs,
   keyboardShortcutSetting: {
     [key in `${`${AuxiliaryKeyName | Capitalize<AuxiliaryKeyName>} + ` | ''}${ContentKeyName}`]?: () => void
   },
@@ -88,32 +89,39 @@ export function useKeyboardShortcurt(
     /** this still not prevent **all** brower shortcut (like build-in ctrl T ) */
     preventAllBrowserKeyboardShortcut?: boolean
   }
-) {
+): { abortKeyboard: () => void } {
+  const bindControllers = useRef<EventListenerController[]>([])
+
   // prevent browser default keyboard shortcut (should avoid browser build-in shortcut as much as possiable)
   useEffect(() => {
     if (!options?.preventAllBrowserKeyboardShortcut) return
-    const pureEl = shrinkMayRef(el)
-    if (!pureEl) return
-    preventDefaultKeyboardShortcut(pureEl)
+    const pureEls = getHTMLElementsFromRefs(el)
+    pureEls.forEach((pureEl) => preventDefaultKeyboardShortcut(pureEl))
   }, [])
 
   useEffect(() => {
-    const pureEl = shrinkMayRef(el)
-    if (!pureEl) return
-    bindKeyboardShortcut(pureEl, keyboardShortcutSetting)
+    const pureEls = getHTMLElementsFromRefs(el)
+    const controllers = pureEls.map((pureEl) => bindKeyboardShortcut(pureEl, keyboardShortcutSetting))
+    bindControllers.current = controllers
+    return () => bindControllers.current.forEach((control) => control.abort())
   }, [el])
+  const abortKeyboard = useCallback(() => bindControllers.current.forEach((control) => control.abort()), [])
+  return { abortKeyboard }
 }
 
 type KeyboardShortcutSetting = {
   [key in `${`${AuxiliaryKeyName | Capitalize<AuxiliaryKeyName>} + ` | ''}${ContentKeyName}`]?: () => void
 }
 
-function bindKeyboardShortcut(el: HTMLElement, keyboardShortcutSetting: KeyboardShortcutSetting) {
+function bindKeyboardShortcut(
+  el: HTMLElement,
+  keyboardShortcutSetting: KeyboardShortcutSetting
+): EventListenerController {
   const formatedKeyboardShortcutSetting = mapKey(keyboardShortcutSetting, (key) =>
     formatKeyboardSettingString(String(key))
   )
   addTabIndex(el) // keydown must have fousable element
-  addEventListener(
+  return addEventListener(
     el,
     'keydown',
     ({ ev }) => {
