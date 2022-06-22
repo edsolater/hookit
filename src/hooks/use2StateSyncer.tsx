@@ -2,7 +2,7 @@ import { areShallowEqual, isNullish, isArray, isObject } from '@edsolater/fnkit'
 import { useRecordedEffect } from './useRecordedEffect'
 
 /** can't judege which is newer is firstTime, U counld set conflictMasterSide, ('auto' will respect larger one) */
-export function useTwoStateSyncer<T>({
+export function use2StateSyncer<T>({
   state1,
   onState2Changed,
   state2,
