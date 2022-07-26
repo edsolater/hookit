@@ -74,7 +74,7 @@ type KeyNamesNavigation =
   | 'ArrowRight'
   | 'ArrowDown'
 type KeyboardShortcutSetting = {
-  [key in `${`${AuxiliaryKeyName | Capitalize<AuxiliaryKeyName>} + ` | ''}${ContentKeyName}`]?: () => void
+  [key in `${`${AuxiliaryKeyName} + ` | ''}${ContentKeyName}`]?: () => void
 }
 export function bindKeyboardShortcut(
   el: HTMLElement,

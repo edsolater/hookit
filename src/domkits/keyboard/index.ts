@@ -1,2 +1,2 @@
 export * from './handleShortcut'
-export * from './useKeyboardShortcurt'
+export * from './useKeyboardShortcut'

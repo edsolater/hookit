@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { createRefHook } from '../../functions'
 import { EventListenerController } from '../../utils/dom/addEventListener'
 import { getHTMLElementsFromRefs, HTMLElementRefs } from '../../utils/react/getElementsFromRefs'
 import {
@@ -17,7 +18,7 @@ export function uniqueItems<T>(arr: T[]): T[] {
  *
  * it is not so good to customize the `Tab`, `Tab` should be move focus
  */
-export function useKeyboardShortcurt(
+export function useKeyboardShortcut(
   el: HTMLElementRefs,
   keyboardShortcutSetting: {
     [key in `${`${AuxiliaryKeyName | Capitalize<AuxiliaryKeyName>} + ` | ''}${ContentKeyName}`]?: () => void
@@ -45,3 +46,6 @@ export function useKeyboardShortcurt(
   const abortKeyboard = useCallback(() => bindControllers.current.forEach((control) => control.abort()), [])
   return { abortKeyboard }
 }
+
+
+export const useKeyboardShortcutRef = createRefHook(useKeyboardShortcut)
