@@ -1,6 +1,6 @@
 {
   "name": "@edsolater/hookit",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "simple react management, simulate core philosophy of zustand",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -13,9 +13,6 @@
     "type": "git",
     "url": "git+https://github.com/edsolater/hookit.git"
   },
-  "files": [
-    "dist"
-  ],
   "author": "edsolater <edsolater@qq.com>",
   "license": "MIT",
   "bugs": {
@@ -29,7 +26,7 @@
     "typescript": "^4.7.3"
   },
   "dependencies": {
-    "@edsolater/fnkit": "^0.1.6",
+    "@edsolater/fnkit": "^0.1.5",
     "react": "^18.1.0"
   },
   "peerDependencies": {

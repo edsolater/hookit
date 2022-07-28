@@ -1,36 +1,49 @@
 import { isExist } from '@edsolater/fnkit'
-import { MutableRefObject } from 'react'
+import { MutableRefObject, useMemo } from 'react'
 import { createRef, useRef } from 'react'
 
-/**
- * @return proxied { current: xxx }
- */
-export default function useCallbackRef<T = unknown>(options?: {
+type CallbackRefOptions<T> = {
   defaultValue?: T
   onAttach?: (current: T) => void
   onDetach?: () => void
   onChange?: (current: T, prev: T) => void
-}): MutableRefObject<T> {
-  const originalRef = useRef<T>(options?.defaultValue ?? null)
-  const proxied = useRef(
-    new Proxy(originalRef, {
-      set(target, p, value) {
-        if (p === 'current' && isExist(value)) {
-          if (isExist(value)) options?.onAttach?.(value)
-          if (!isExist(value)) options?.onDetach?.()
-          const prev = target.current as T
-          options?.onChange?.(value, prev)
+}
+
+/**
+ * @return proxied { current: xxx }
+ */
+export default function useCallbackRef<T = unknown>(
+  options?: CallbackRefOptions<T>
+): MutableRefObject<T> & { onChange: (cb: (v: T, prev: T | undefined) => void) => void } {
+  const originalRef = useRef<T>(options?.defaultValue ?? null) as unknown as MutableRefObject<T>
+  const onChangeCallbacks = useRef<CallbackRefOptions<T>['onChange'][]>([options?.onChange])
+  const richRef = useMemo(
+    () => ({
+      get current() {
+        return originalRef.current
+      },
+      set current(value) {
+        originalRef.current = value
+        if (isExist(value)) {
+          options?.onAttach?.(value)
+          const prev = originalRef.current
+          onChangeCallbacks.current.forEach((onChange) => onChange?.(value, prev))
         }
-        if (p === 'current' && !isExist(value)) {
+        if (!isExist(value)) {
           options?.onDetach?.()
         }
-        Reflect.set(target, p, value)
-        return true
+      },
+      onChange: (cb: (v: T, prev: T | undefined) => void, options?: { hasInit?: boolean }) => {
+        // init invoke
+        if (options?.hasInit && originalRef.current != null) {
+          cb(originalRef.current, undefined)
+        }
+        onChangeCallbacks.current.push(cb)
       }
-    })
+    }),
+    []
   )
-  // @ts-expect-error  use proxied must typed not elegant
-  return proxied.current
+  return richRef
 }
 
 export function createCallbackRef<T = unknown>(callback: (current: T) => void) {
