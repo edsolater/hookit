@@ -1,14 +1,14 @@
 {
   "name": "@edsolater/hookit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "simple react management, simulate core philosophy of zustand",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "scripts": {
     "build": "tsup",
     "test": "jest",
     "type-check": "tsc --pretty --noEmit"
   },
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edsolater/hookit.git"
