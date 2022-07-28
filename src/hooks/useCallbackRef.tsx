@@ -14,7 +14,9 @@ type CallbackRefOptions<T> = {
  */
 export default function useCallbackRef<T = unknown>(
   options?: CallbackRefOptions<T>
-): MutableRefObject<T> & { onChange: (cb: (v: T, prev: T | undefined) => void) => void } {
+): MutableRefObject<T> & {
+  onChange: (cb: (v: T, prev: T | undefined) => void, options?: { hasInit?: boolean }) => void
+} {
   const originalRef = useRef<T>(options?.defaultValue ?? null) as unknown as MutableRefObject<T>
   const onChangeCallbacks = useRef<CallbackRefOptions<T>['onChange'][]>([options?.onChange])
   const richRef = useMemo(
